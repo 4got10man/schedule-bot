@@ -7,6 +7,8 @@ from db.crud import update_student_data
 from keyboards import keyboard as kb
 from notifications import add_notification
 from states import UserUpdates
+from utils import validate_time
+from utils import validate_class_name
 
 router = Router()
 
@@ -15,7 +17,7 @@ router = Router()
 async def change_notification_time(message: Message, state: FSMContext) -> None:
     await message.answer(
         "Введите время уведомлений в формате HH:MM, например 19:00. "
-        "Если же регулярные уведомления не нужны, введите дефис"
+        "Если же регулярные уведомления не нужны, введите слово 'нет'."
     )
     await state.set_state(UserUpdates.change_notification_time)
 
@@ -24,7 +26,7 @@ async def change_notification_time(message: Message, state: FSMContext) -> None:
 async def set_notification_time(
     message: Message, state: FSMContext, session: AsyncSession, bot: Bot
 ) -> None:
-    await state.update_data(notification_time=message.text)
+    await validate_time(message, state)
     data = await state.get_data()
     notification_time = data["notification_time"]
     student = await update_student_data(
@@ -32,7 +34,7 @@ async def set_notification_time(
     )
     await message.answer(
         "Спасибо, данные обновлены.\n"
-        f"Время уведомлений: {student.notification_time}",
+        f"Время уведомлений: {student.notification_time or 'уведомления отключены'}",
         reply_markup=kb.as_markup(resize_keyboard=True),
     )
     await add_notification(
@@ -58,7 +60,7 @@ async def set_class_name(
     message: Message, state: FSMContext, session: AsyncSession, bot: Bot
 ) -> None:
     telegram_id = message.from_user.id
-    await state.update_data(class_name=message.text)
+    await validate_class_name(message, state)
     data = await state.get_data()
     class_name = data["class_name"]
     student = await update_student_data(session, telegram_id, "class_name", class_name)

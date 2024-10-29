@@ -5,17 +5,15 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.crud import get_all_students_data
-from utils import parse_schedule, translate_weekday
+from utils import parse_all_schedules, translate_weekday
 
 scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
 
 
 async def send_daily_notifications(class_name: str, bot: Bot, telegram_id: int) -> None:
     tomorrow = translate_weekday((datetime.now() + timedelta(days=1)).strftime("%A"))
-    schedule = parse_schedule(class_name.split("_")[0])
-    schedule_text = (
-        tomorrow + ":\n" + schedule[class_name].get(tomorrow, "Нет занятий   🥳")
-    )
+    schedule = (await parse_all_schedules()).get(class_name)
+    schedule_text = tomorrow + ":\n" + schedule.get(tomorrow, "Нет занятий   🥳")
     await bot.send_message(telegram_id, schedule_text)
 
 
@@ -37,7 +35,6 @@ async def add_notification(
     job = scheduler.get_job(job_id)
     if job:
         scheduler.remove_job(job_id)
-    print(f"{notification_time = }")
     if notification_time is None:
         return
     hour, minute = notification_time.split(":")

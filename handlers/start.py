@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from aiogram import Bot, Router, html
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
@@ -10,6 +8,7 @@ from db.crud import add_student, get_student_data
 from keyboards import keyboard as kb
 from notifications import add_notification
 from states import UserRegistration
+from utils import validate_class_name, validate_time
 
 router = Router()
 
@@ -42,7 +41,10 @@ async def command_start_handler(
 
 @router.message(UserRegistration.class_name)
 async def get_class_name(message: Message, state: FSMContext) -> None:
-    await state.update_data(class_name=message.text)
+    await validate_class_name(message, state)
+    data = await state.get_data()
+    if not data.get("class_name"):
+        return
     await state.set_state(UserRegistration.notification_time)
     await message.answer(
         "Если Вы хотите получать регулярные уведомления с расписанием уроков на "
@@ -56,19 +58,7 @@ async def get_class_name(message: Message, state: FSMContext) -> None:
 async def get_notification_time(
     message: Message, session: AsyncSession, state: FSMContext, bot: Bot
 ) -> None:
-    if message.text.strip().lower() == "нет":
-        await state.update_data(notification_time=None)
-    else:
-        try:
-            entered_time = datetime.strptime(message.text, "%H:%M").time()
-        except ValueError:
-            await message.answer(
-                "Время введено некорректно. Введите время в формате HH:MM, либо "
-                "слово 'нет', если сейчас уведомления не нужны."
-            )
-            return
-
-        await state.update_data(notification_time=entered_time.strftime("%H:%M"))
+    await validate_time(message, state)
     data = await state.get_data()
     telegram_id = data["telegram_id"]
     class_name = data["class_name"]
