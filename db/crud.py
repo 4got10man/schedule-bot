@@ -1,6 +1,5 @@
 from typing import Any
 
-from aiogram import Bot
 from sqlalchemy import ScalarResult, select
 from sqlalchemy.ext.asyncio import AsyncSession
 

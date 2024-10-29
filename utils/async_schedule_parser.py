@@ -1,5 +1,4 @@
 import asyncio
-from pprint import pp
 
 import aiohttp
 from bs4 import BeautifulSoup
@@ -63,7 +62,3 @@ async def parse_all_schedules() -> dict[str, dict[str, str]]:
         all_schedules.update(result)
 
     return all_schedules
-
-
-# all_data = asyncio.run(parse_all_schedules())
-# pp(tuple(all_data.keys()))
