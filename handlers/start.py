@@ -6,9 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.crud import add_student, get_student_data
 from keyboards import keyboard as kb
-from notifications import add_notification
 from states import UserRegistration
-from utils import validate_class_name, validate_time
+from utils import add_notification, validate_class_name, validate_time
 
 router = Router()
 
@@ -22,7 +21,7 @@ async def command_start_handler(
         await message.answer(
             f"Вы уже зарегистрированы. Ваши данные:\n"
             f"Класс: {data.class_name}\n"
-            f"Время уведомлений: {data.notification_time}\n"
+            f"Время уведомлений: {data.notification_time or 'уведомления отключены'}\n"
             "Для изменения данных воспользуйтесь экранной клавиатурой.",
             reply_markup=kb.as_markup(resize_keyboard=True),
         )

@@ -10,7 +10,7 @@ from aiogram.enums import ParseMode
 from db.engine import async_session, create_db_and_tables
 from handlers import schedule_router, start_router, updates_router
 from middlewares import DatabaseMiddleware
-from notifications import schedule_daily_notifications, scheduler
+from utils import schedule_daily_notifications, scheduler
 
 TOKEN = getenv("BOT_TOKEN")
 

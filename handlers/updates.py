@@ -5,9 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.crud import update_student_data
 from keyboards import keyboard as kb
-from notifications import add_notification
 from states import UserUpdates
-from utils import validate_class_name, validate_time
+from utils import add_notification, validate_class_name, validate_time
 
 router = Router()
 
